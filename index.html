@@ -42,11 +42,11 @@ section.active{display:block}
 .t-s{background:var(--semi-bg);color:var(--semi);border-color:var(--semi)}
 .t-n{background:var(--non-bg);color:var(--non);border-color:var(--non)}
 .pill.off{opacity:.35}
-.scroll{overflow-x:auto;padding-bottom:8px}
-#table-grid{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(54px,1fr));gap:4px;min-width:1000px}
-.el{aspect-ratio:1/1.2;border-radius:8px;border:2px solid;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;line-height:1.1;transition:transform .12s, opacity .2s}
+.scroll{overflow-x:auto;padding-bottom:8px;direction:ltr}
+#table-grid{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(50px,1fr));gap:4px;min-width:940px}
+.el{min-height:72px;border-radius:8px;border:2px solid;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;line-height:1.1;transition:transform .12s, opacity .2s}
 .el:hover{transform:scale(1.12);z-index:2}
-.el small{font-size:10px;opacity:.8}
+.el small{font-size:11px;opacity:.85;line-height:1.2}
 .el b{font-size:17px}
 .el .em{font-size:20px;line-height:1.15}
 .el.dim{opacity:.15}
@@ -259,7 +259,7 @@ function buildFilters(){
   });
 }
 function paintFilter(){document.querySelectorAll('.el[data-t]').forEach(el=>el.classList.toggle('dim',!active.has(el.dataset.t)))}
-const ICON={"H": "💧", "He": "🎈", "Li": "🔋", "Be": "💎", "B": "\U0001fad9", "C": "✏️", "N": "🌬️", "O": "🫁", "F": "🦷", "Ne": "🪧", "Na": "🧂", "Mg": "🎇", "Al": "🥤", "Si": "💻", "P": "🔥", "S": "🌋", "Cl": "🏊", "Ar": "💡", "K": "🍌", "Ca": "🦴", "Sc": "🚲", "Ti": "✈️", "V": "🔧", "Cr": "🪞", "Mn": "🔩", "Fe": "🧲", "Co": "🔵", "Ni": "🪙", "Cu": "🔌", "Zn": "🛡️", "Ga": "✋", "Ge": "📟", "As": "☠️", "Se": "✨", "Br": "🔴", "Kr": "🚗", "Rb": "⏱️", "Sr": "🎆", "Y": "📺", "Zr": "💠", "Nb": "🏥", "Mo": "⚙️", "Tc": "☢️", "Ru": "🖊️", "Rh": "💍", "Pd": "🚘", "Ag": "🥈", "Cd": "\U0001faab", "In": "📱", "Sn": "🥫", "Sb": "🔨", "Te": "☀️", "I": "🩹", "Xe": "🚙"};
+const ICON={H:"💧",He:"🎈",Li:"🔋",Be:"💎",B:"🧪",C:"✏️",N:"🌬️",O:"🤿",F:"🦷",Ne:"🌃",Na:"🧂",Mg:"🎇",Al:"🥤",Si:"💻",P:"🔥",S:"🌋",Cl:"🏊",Ar:"💡",K:"🍌",Ca:"🦴",Sc:"🚲",Ti:"✈️",V:"🔧",Cr:"🚰",Mn:"🔩",Fe:"🧲",Co:"🔵",Ni:"💰",Cu:"🔌",Zn:"🛡️",Ga:"✋",Ge:"📟",As:"☠️",Se:"✨",Br:"🔴",Kr:"🚗",Rb:"⏱️",Sr:"🎆",Y:"📺",Zr:"💠",Nb:"🏥",Mo:"⚙️",Tc:"☢️",Ru:"🖊️",Rh:"💍",Pd:"🚘",Ag:"🥈",Cd:"⚠️",In:"📱",Sn:"🥫",Sb:"🔨",Te:"☀️",I:"🩹",Xe:"🚙"};
 function showInfo(e){
   const T=TYPES[e.t];
   $('#info').innerHTML=`<div class="big" style="background:${T.bg};border-color:${T.c};color:${T.c}"><small>${e.n}</small><span style="font-size:26px;line-height:1.1">${ICON[e.sym]}</span><b>${e.sym}</b></div>
@@ -304,9 +304,9 @@ const PIC={
  B:['🏗️🪜','بنى السلّم'],Si:['💻','رقاقة الحاسوب'],Ge:['📟','جهاز إلكتروني'],
  As:['☠️','سام!'],Sb:['🔨🧱','هش يتكسّر'],Te:['☀️🔋','لوح شمسي'],
  H:['💧','أخف عنصر (في الماء)'],C:['💎⚫','فحم وألماس'],N:['🌬️','يملأ الهواء'],
- O:['🫁','نتنفسه'],P:['🔥','عود الكبريت'],S:['🟡','أصفر ورائحته كريهة'],Se:['✨','يلمع'],
+ O:['🤿','نتنفسه'],P:['🔥','عود الكبريت'],S:['🟡','أصفر ورائحته كريهة'],Se:['✨','يلمع'],
  F:['🦷','معجون الأسنان'],Cl:['🏊','ماء المسبح'],Br:['🔴🧪','سائل أحمر'],I:['🟣🩹','بنفسجي للجروح'],
- He:['🎈','بالون العيد'],Ne:['🪧','لافتة المحل'],Ar:['💡','المصباح'],Kr:['🚗','مصباح السيارة'],Xe:['🚙','مصباح السيارة']
+ He:['🎈','بالون العيد'],Ne:['🌃','لافتة المحل'],Ar:['💡','المصباح'],Kr:['🚗','مصباح السيارة'],Xe:['🚙','مصباح السيارة']
 };
 function buildStories(){
   const root=$('#story-list');
