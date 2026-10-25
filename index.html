@@ -43,15 +43,16 @@ section.active{display:block}
 .t-n{background:var(--non-bg);color:var(--non);border-color:var(--non)}
 .pill.off{opacity:.35}
 .scroll{overflow-x:auto;padding-bottom:8px}
-#table-grid{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(46px,1fr));gap:4px;min-width:900px}
-.el{aspect-ratio:1/1.05;border-radius:8px;border:2px solid;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;line-height:1.1;transition:transform .12s, opacity .2s}
+#table-grid{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(54px,1fr));gap:4px;min-width:1000px}
+.el{aspect-ratio:1/1.2;border-radius:8px;border:2px solid;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;line-height:1.1;transition:transform .12s, opacity .2s}
 .el:hover{transform:scale(1.12);z-index:2}
 .el small{font-size:10px;opacity:.8}
-.el b{font-size:18px}
+.el b{font-size:17px}
+.el .em{font-size:20px;line-height:1.15}
 .el.dim{opacity:.15}
 .el.blank{border:none;background:none;cursor:default;pointer-events:none}
 #info{margin-top:14px;min-height:96px;display:flex;gap:16px;align-items:center}
-#info .big{width:84px;height:84px;border-radius:14px;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;direction:ltr}
+#info .big{width:96px;height:96px;border-radius:14px;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;direction:ltr}
 #info .big b{font-size:34px;line-height:1}
 #info h3{margin:0}
 .props{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
@@ -258,9 +259,10 @@ function buildFilters(){
   });
 }
 function paintFilter(){document.querySelectorAll('.el[data-t]').forEach(el=>el.classList.toggle('dim',!active.has(el.dataset.t)))}
+const ICON={"H": "💧", "He": "🎈", "Li": "🔋", "Be": "💎", "B": "\U0001fad9", "C": "✏️", "N": "🌬️", "O": "🫁", "F": "🦷", "Ne": "🪧", "Na": "🧂", "Mg": "🎇", "Al": "🥤", "Si": "💻", "P": "🔥", "S": "🌋", "Cl": "🏊", "Ar": "💡", "K": "🍌", "Ca": "🦴", "Sc": "🚲", "Ti": "✈️", "V": "🔧", "Cr": "🪞", "Mn": "🔩", "Fe": "🧲", "Co": "🔵", "Ni": "🪙", "Cu": "🔌", "Zn": "🛡️", "Ga": "✋", "Ge": "📟", "As": "☠️", "Se": "✨", "Br": "🔴", "Kr": "🚗", "Rb": "⏱️", "Sr": "🎆", "Y": "📺", "Zr": "💠", "Nb": "🏥", "Mo": "⚙️", "Tc": "☢️", "Ru": "🖊️", "Rh": "💍", "Pd": "🚘", "Ag": "🥈", "Cd": "\U0001faab", "In": "📱", "Sn": "🥫", "Sb": "🔨", "Te": "☀️", "I": "🩹", "Xe": "🚙"};
 function showInfo(e){
   const T=TYPES[e.t];
-  $('#info').innerHTML=`<div class="big" style="background:${T.bg};border-color:${T.c};color:${T.c}"><small>${e.n}</small><b>${e.sym}</b></div>
+  $('#info').innerHTML=`<div class="big" style="background:${T.bg};border-color:${T.c};color:${T.c}"><small>${e.n}</small><span style="font-size:26px;line-height:1.1">${ICON[e.sym]}</span><b>${e.sym}</b></div>
   <div><h3>${e.name} — <span style="color:${T.c}">${typeLabel(e)}</span></h3>
   <div>الدورة ${e.p} • المجموعة ${e.g}</div><div>${e.fact}</div></div>`;
 }
@@ -273,7 +275,7 @@ function buildTable(){
     const T=TYPES[e.t];
     d.className='el';d.dataset.t=e.t;
     d.style.cssText=`background:${T.bg};border-color:${T.c};color:${T.c}`;
-    d.innerHTML=`<small>${e.n}</small><b>${e.sym}</b>`;
+    d.innerHTML=`<small>${e.n}</small><span class="em">${ICON[e.sym]}</span><b>${e.sym}</b>`;
     d.title=e.name;d.onclick=()=>showInfo(e);
     g.appendChild(d);
   }
