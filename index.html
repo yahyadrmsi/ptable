@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مختبر العناصر</title>
+<style>
+:root{
+  --bg:#f4f1ea; --card:#ffffff; --ink:#1d2433; --muted:#5d6678; --line:#e1dccf;
+  --metal:#2f6fd6; --metal-bg:#dbe8ff;
+  --semi:#e8821a; --semi-bg:#ffe6c7;
+  --non:#1f9d62; --non-bg:#d3f3e2;
+  --accent:#6a3fd1; --good:#1f9d62; --bad:#d63b3b;
+  --shadow:0 2px 0 rgba(0,0,0,.06),0 8px 24px rgba(30,30,60,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14171f; --card:#1e2330; --ink:#f0eee8; --muted:#a2a9ba; --line:#303749;
+    --metal:#7aa7ff; --metal-bg:#1c2f58;
+    --semi:#ffae5c; --semi-bg:#4a3217;
+    --non:#52d398; --non-bg:#16412f;
+    --accent:#a78bfa;
+    --shadow:0 2px 0 rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Tajawal","Cairo","Geeza Pro","Segoe UI",Tahoma,sans-serif;font-size:18px;line-height:1.6}
+header{padding:20px 16px 8px;text-align:center}
+header h1{margin:0;font-size:clamp(26px,5vw,38px)}
+header p{margin:4px 0 0;color:var(--muted)}
+nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:12px 16px;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+nav button{font:inherit;font-weight:700;padding:10px 18px;border-radius:999px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+nav button[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:16px}
+section{display:none}
+section.active{display:block}
+.card{background:var(--card);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.legend,.filters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:0 0 14px}
+.pill{font:inherit;font-weight:700;padding:6px 16px;border-radius:999px;border:2px solid transparent;cursor:pointer}
+.t-m{background:var(--metal-bg);color:var(--metal);border-color:var(--metal)}
+.t-s{background:var(--semi-bg);color:var(--semi);border-color:var(--semi)}
+.t-n{background:var(--non-bg);color:var(--non);border-color:var(--non)}
+.pill.off{opacity:.35}
+.scroll{overflow-x:auto;padding-bottom:8px}
+#table-grid{direction:ltr;display:grid;grid-template-columns:repeat(18,minmax(46px,1fr));gap:4px;min-width:900px}
+.el{aspect-ratio:1/1.05;border-radius:8px;border:2px solid;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;line-height:1.1;transition:transform .12s, opacity .2s}
+.el:hover{transform:scale(1.12);z-index:2}
+.el small{font-size:10px;opacity:.8}
+.el b{font-size:18px}
+.el.dim{opacity:.15}
+.el.blank{border:none;background:none;cursor:default;pointer-events:none}
+#info{margin-top:14px;min-height:96px;display:flex;gap:16px;align-items:center}
+#info .big{width:84px;height:84px;border-radius:14px;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;direction:ltr}
+#info .big b{font-size:34px;line-height:1}
+#info h3{margin:0}
+.props{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.props .card{border-top:8px solid}
+.props ul{padding-inline-start:20px;margin:8px 0}
+.bins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.bin{border:3px dashed;border-radius:16px;padding:10px;min-height:150px;text-align:center;cursor:pointer;transition:background .15s}
+.bin.hot{background:rgba(120,120,255,.15)}
+.bin h3{margin:0 0 6px;font-size:18px}
+.bin .count{font-size:30px;font-weight:800}
+.pool{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;min-height:80px;padding:12px;background:var(--card);border-radius:16px}
+.chip{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;padding:8px 14px;border-radius:12px;background:var(--bg);border:2px solid var(--line);font-weight:800;text-align:center;font-size:20px;direction:ltr;min-width:70px}
+.chip small{display:block;font-size:13px;font-weight:600;direction:rtl;color:var(--muted)}
+.chip.sel{border-color:var(--accent);box-shadow:0 0 0 4px rgba(106,63,209,.25)}
+.chip.ghost{position:fixed;pointer-events:none;z-index:50;opacity:.9;transform:scale(1.1)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.msg{text-align:center;min-height:34px;font-weight:700;margin:10px 0}
+.btn{font:inherit;font-weight:800;padding:10px 24px;border-radius:12px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+.btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.flash{perspective:900px;max-width:380px;margin:0 auto 16px}
+.flash .inner{position:relative;height:260px;transform-style:preserve-3d;transition:transform .5s;cursor:pointer}
+.flash.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;border:4px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);padding:12px;text-align:center}
+.face.front b{font-size:90px;line-height:1;direction:ltr}
+.face.back{transform:rotateY(180deg)}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 auto 14px;max-width:380px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.opts{display:grid;gap:10px;margin:14px 0;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.opt{font:inherit;font-weight:700;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.opt.right{background:var(--non-bg);border-color:var(--non)}
+.opt.wrong{background:#fde0e0;border-color:var(--bad);color:#7a1d1d}
+.stars{font-size:48px;text-align:center}
+.story{margin-bottom:14px}
+.story h2{margin:0 0 8px}
+.story p{font-size:20px;line-height:2.1;margin:0 0 10px}
+.sel-el{font:inherit;font-weight:800;border:2px solid;border-radius:10px;padding:0 10px;cursor:pointer}
+.story .note{color:var(--muted);font-size:16px}
+.strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
+.arr{font-size:26px;color:var(--muted)}
+.scene{font:inherit;display:flex;flex-direction:column;align-items:center;gap:0;line-height:1.3;width:112px;padding:8px 4px;border:3px solid;border-radius:16px;cursor:pointer;color:var(--ink)}
+.scene .pic{font-size:44px;line-height:1.15}
+.scene b{font-size:22px}
+.scene small{font-size:13px;color:var(--muted)}
+.story .detail{min-height:28px;font-weight:700}
+@media (max-width:560px){body{font-size:16px}.bins{gap:6px}.bin{padding:6px}#info{flex-direction:column;text-align:center}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧪 مختبر العناصر</h1>
+  <p>تعلّم الفلزات وأشباه الفلزات واللافلزات في الجدول الدوري</p>
+</header>
+<nav id="tabs" role="tablist">
+  <button role="tab" data-tab="table" aria-selected="true">الجدول</button>
+  <button role="tab" data-tab="props" aria-selected="false">الخصائص</button>
+  <button role="tab" data-tab="stories" aria-selected="false">قصص الحفظ</button>
+  <button role="tab" data-tab="sort" aria-selected="false">سحب وإفلات</button>
+  <button role="tab" data-tab="cards" aria-selected="false">بطاقات الحفظ</button>
+  <button role="tab" data-tab="quiz" aria-selected="false">اختبار</button>
+</nav>
+<main>
+
+<section id="table" class="active">
+  <div class="card">
+    <div class="filters" id="filters"></div>
+    <div class="scroll"><div id="table-grid"></div></div>
+    <div id="info"><p style="color:var(--muted);margin:auto">اضغط على أي عنصر لتعرف عنه أكثر 👆</p></div>
+  </div>
+</section>
+
+<section id="props">
+  <div class="props">
+    <div class="card" style="border-color:var(--metal)"><h2 class="t-m" style="display:inline-block;padding:2px 16px;border-radius:99px;margin:0">الفلزات</h2>
+      <ul><li>لامعة</li><li>توصل الحرارة والكهرباء جيداً</li><li>قابلة للطرق (تُصنع منها صفائح)</li><li>قابلة للسحب (تُصنع منها أسلاك)</li><li>صلبة غالباً (إلا الزئبق سائل)</li></ul>
+      <p>أمثلة: الحديد Fe، النحاس Cu، الألومنيوم Al، الذهب Au</p>
+      <p>📍 في <b>يسار ووسط</b> الجدول.</p></div>
+    <div class="card" style="border-color:var(--semi)"><h2 class="t-s" style="display:inline-block;padding:2px 16px;border-radius:99px;margin:0">أشباه الفلزات</h2>
+      <ul><li>خصائصها بين الفلزات واللافلزات</li><li>بعضها لامع</li><li>توصيلها للكهرباء ضعيف (أشباه موصلات)</li><li>هشة، تتكسر عند الطرق</li></ul>
+      <p>الستة: B بورون، Si سيليكون، Ge جرمانيوم، As زرنيخ، Sb أنتيمون، Te تيلوريوم</p>
+      <p>📍 على <b>خط متدرج</b> (سلّم) بين الفلزات واللافلزات.</p></div>
+    <div class="card" style="border-color:var(--non)"><h2 class="t-n" style="display:inline-block;padding:2px 16px;border-radius:99px;margin:0">اللافلزات</h2>
+      <ul><li>معتمة وغير لامعة (غير اليود)</li><li>رديئة التوصيل للحرارة والكهرباء</li><li>هشة إن كانت صلبة</li><li>كثير منها غازات (O، N، Cl) أو صلبة (C، S)</li></ul>
+      <p>أمثلة: الأكسجين O، الكربون C، الكبريت S، الهيدروجين H</p>
+      <p>📍 في <b>يمين</b> الجدول (والهيدروجين في الزاوية).</p></div>
+  </div>
+  <div class="card" style="margin-top:14px"><b>💡 حيلة للحفظ:</b> ارسم السلّم من البورون B إلى الأستاتين. ما على يساره فلزات، وما على يمينه لافلزات، وما على السلّم أشباه فلزات.</div>
+</section>
+
+<section id="stories">
+  <div id="story-list"></div>
+</section>
+
+<section id="sort">
+  <div class="card">
+    <p style="margin-top:0">اسحب كل عنصر إلى الصندوق المناسب، أو اضغط على العنصر ثم على الصندوق.</p>
+    <div class="bins" id="bins"></div>
+    <div class="msg" id="sort-msg"></div>
+    <div class="pool" id="pool"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="sort-new">جولة جديدة</button></div>
+  </div>
+</section>
+
+<section id="cards">
+  <div class="card">
+    <div class="bar"><i id="fc-bar"></i></div>
+    <div class="flash" id="flash"><div class="inner" id="flash-inner"></div></div>
+    <p class="msg" id="fc-msg">اضغط على البطاقة لتقلبها</p>
+    <div class="row">
+      <button class="btn alt" id="fc-no">🤔 لم أعرفها</button>
+      <button class="btn" id="fc-yes">✅ عرفتها</button>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="card" id="quiz-box"></div>
+</section>
+
+</main>
+<script>
+// [العدد, الرمز, الاسم, النوع (m/s/n), الدورة, المجموعة, معلومة, غاز نبيل؟]
+const D = [
+[1,'H','الهيدروجين','n',1,1,'أخف عنصر في الكون، وهو غاز'],
+[2,'He','الهيليوم','n',1,18,'غاز نبيل يملأ البالونات',1],
+[3,'Li','الليثيوم','m',2,1,'أخف فلز، يُستعمل في بطاريات الهاتف'],
+[4,'Be','البيريليوم','m',2,2,'فلز خفيف وصلب'],
+[5,'B','البورون','s',2,13,'شبه فلز يدخل في صناعة الزجاج المقاوم للحرارة'],
+[6,'C','الكربون','n',2,14,'أساس الحياة، منه الفحم والألماس'],
+[7,'N','النيتروجين','n',2,15,'أكثر غاز في الهواء (78%)'],
+[8,'O','الأكسجين','n',2,16,'غاز نتنفسه ونحتاجه للحياة'],
+[9,'F','الفلور','n',2,17,'غاز سام يوجد في معجون الأسنان بشكل آمن'],
+[10,'Ne','النيون','n',2,18,'غاز نبيل يضيء اللافتات',1],
+[11,'Na','الصوديوم','m',3,1,'فلز طري جداً، يتفاعل بقوة مع الماء'],
+[12,'Mg','المغنسيوم','m',3,2,'يحترق بضوء أبيض ساطع'],
+[13,'Al','الألومنيوم','m',3,13,'فلز خفيف نصنع منه العلب والطائرات'],
+[14,'Si','السيليكون','s',3,14,'شبه فلز أساس الرقائق الإلكترونية'],
+[15,'P','الفوسفور','n',3,15,'لافلز يوجد في رؤوس أعواد الكبريت'],
+[16,'S','الكبريت','n',3,16,'لافلز أصفر صلب رائحة مركباته كريهة'],
+[17,'Cl','الكلور','n',3,17,'غاز أخضر مصفر يعقم مياه المسابح'],
+[18,'Ar','الأرجون','n',3,18,'غاز نبيل يُملأ به المصابيح',1],
+[19,'K','البوتاسيوم','m',4,1,'فلز طري موجود في الموز'],
+[20,'Ca','الكالسيوم','m',4,2,'فلز يبني العظام والأسنان'],
+[21,'Sc','السكانديوم','m',4,3,'فلز انتقالي خفيف'],
+[22,'Ti','التيتانيوم','m',4,4,'فلز قوي وخفيف'],
+[23,'V','الفاناديوم','m',4,5,'يقوّي الفولاذ'],
+[24,'Cr','الكروم','m',4,6,'فلز لامع يُطلى به الحديد'],
+[25,'Mn','المنغنيز','m',4,7,'يدخل في صناعة الفولاذ'],
+[26,'Fe','الحديد','m',4,8,'أكثر فلز استخداماً، ينجذب للمغناطيس'],
+[27,'Co','الكوبالت','m',4,9,'يعطي اللون الأزرق للزجاج'],
+[28,'Ni','النيكل','m',4,10,'تُصنع منه بعض العملات'],
+[29,'Cu','النحاس','m',4,11,'لونه محمر، ممتاز في توصيل الكهرباء'],
+[30,'Zn','الخارصين (الزنك)','m',4,12,'يُطلى به الحديد ليحميه من الصدأ'],
+[31,'Ga','الغاليوم','m',4,13,'فلز ينصهر في اليد'],
+[32,'Ge','الجرمانيوم','s',4,14,'شبه فلز يُستعمل في الإلكترونيات'],
+[33,'As','الزرنيخ','s',4,15,'شبه فلز سام'],
+[34,'Se','السيلينيوم','n',4,16,'لافلز يُستعمل في الخلايا الضوئية'],
+[35,'Br','البروم','n',4,17,'اللافلز السائل الوحيد، أحمر ورائحته قوية'],
+[36,'Kr','الكريبتون','n',4,18,'غاز نبيل',1],
+[37,'Rb','الروبيديوم','m',5,1,'فلز طري يتفاعل بشدة مع الماء'],
+[38,'Sr','السترونشيوم','m',5,2,'يعطي اللون الأحمر للألعاب النارية'],
+[39,'Y','الإتريوم','m',5,3,'فلز يُستعمل في شاشات التلفاز'],
+[40,'Zr','الزركونيوم','m',5,4,'فلز مقاوم للتآكل'],
+[41,'Nb','النيوبيوم','m',5,5,'فلز يدخل في المغانط القوية'],
+[42,'Mo','الموليبدينوم','m',5,6,'فلز يقوّي الفولاذ'],
+[43,'Tc','التكنيشيوم','m',5,7,'أول عنصر صنعه الإنسان'],
+[44,'Ru','الروثينيوم','m',5,8,'فلز نادر صلب'],
+[45,'Rh','الروديوم','m',5,9,'فلز ثمين جداً'],
+[46,'Pd','البلاديوم','m',5,10,'يُستعمل في عوادم السيارات'],
+[47,'Ag','الفضة','m',5,11,'أفضل فلز في توصيل الكهرباء'],
+[48,'Cd','الكادميوم','m',5,12,'فلز يُستعمل في البطاريات'],
+[49,'In','الإنديوم','m',5,13,'فلز طري يُستعمل في الشاشات'],
+[50,'Sn','القصدير','m',5,14,'تُصنع منه علب الأطعمة المعدنية'],
+[51,'Sb','الأنتيمون','s',5,15,'شبه فلز هش لامع'],
+[52,'Te','التيلوريوم','s',5,16,'شبه فلز في الألواح الشمسية'],
+[53,'I','اليود','n',5,17,'لافلز صلب بنفسجي ولامع قليلاً'],
+[54,'Xe','الزينون','n',5,18,'غاز نبيل في مصابيح السيارات',1]
+].map(a=>({n:a[0],sym:a[1],name:a[2],t:a[3],p:a[4],g:a[5],fact:a[6],noble:!!a[7]}));
+
+const TYPES={m:{label:'فلز',plural:'الفلزات',cls:'t-m',c:'var(--metal)',bg:'var(--metal-bg)'},
+             s:{label:'شبه فلز',plural:'أشباه الفلزات',cls:'t-s',c:'var(--semi)',bg:'var(--semi-bg)'},
+             n:{label:'لافلز',plural:'اللافلزات',cls:'t-n',c:'var(--non)',bg:'var(--non-bg)'}};
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const pick=(a,k)=>shuffle(a).slice(0,k);
+const typeLabel=e=>TYPES[e.t].label+(e.noble?' (غاز نبيل)':'');
+
+// ---------- تبويبات ----------
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  document.querySelectorAll('main section').forEach(s=>s.classList.toggle('active',s.id===b.dataset.tab));
+});
+
+// ---------- الجدول ----------
+const active=new Set(['m','s','n']);
+function buildFilters(){
+  const f=$('#filters');
+  Object.entries(TYPES).forEach(([k,v])=>{
+    const b=document.createElement('button');
+    b.className='pill '+v.cls;b.textContent=v.plural;
+    b.onclick=()=>{active.has(k)?active.delete(k):active.add(k);b.classList.toggle('off',!active.has(k));paintFilter()};
+    f.appendChild(b);
+  });
+}
+function paintFilter(){document.querySelectorAll('.el[data-t]').forEach(el=>el.classList.toggle('dim',!active.has(el.dataset.t)))}
+function showInfo(e){
+  const T=TYPES[e.t];
+  $('#info').innerHTML=`<div class="big" style="background:${T.bg};border-color:${T.c};color:${T.c}"><small>${e.n}</small><b>${e.sym}</b></div>
+  <div><h3>${e.name} — <span style="color:${T.c}">${typeLabel(e)}</span></h3>
+  <div>الدورة ${e.p} • المجموعة ${e.g}</div><div>${e.fact}</div></div>`;
+}
+function buildTable(){
+  const g=$('#table-grid');
+  for(let p=1;p<=5;p++)for(let c=1;c<=18;c++){
+    const e=D.find(x=>x.p===p&&x.g===c);
+    const d=document.createElement('button');
+    if(!e){d.className='el blank';g.appendChild(d);continue}
+    const T=TYPES[e.t];
+    d.className='el';d.dataset.t=e.t;
+    d.style.cssText=`background:${T.bg};border-color:${T.c};color:${T.c}`;
+    d.innerHTML=`<small>${e.n}</small><b>${e.sym}</b>`;
+    d.title=e.name;d.onclick=()=>showInfo(e);
+    g.appendChild(d);
+  }
+}
+buildFilters();buildTable();
+
+// ---------- قصص الحفظ ----------
+// {Sym} في النص يتحول إلى زر عنصر ملوّن
+const STORIES=[
+ {title:'🪜 قصة أشباه الفلزات',
+  note:'تخيّل سلّماً يفصل مدينة الفلزات عن مدينة اللافلزات، وعليه ستة أشخاص.',
+  paras:['بنى {B} السلّم. صعد عليه {Si} الذكي وهو يحمل رقاقة الحاسوب. ثم جاء {Ge} بجهازه الإلكتروني. وفجأة ظهر {As} السام، فخاف الجميع. فنادوا {Sb} الهش ليساعدهم. وأخيراً وصل {Te} بلوحته الشمسية وأنقذهم.'],
+  order:['B','Si','Ge','As','Sb','Te']},
+ {title:'🌱 اللافلزات 1: عائلة الحياة',
+  paras:['{H} الصغير أخف واحد في العائلة، يمسك بيد {C} الأسود صاحب الفحم والألماس. {N} يملأ الهواء حولهما، و{O} يتنفسونه جميعاً. أشعل {P} عود الكبريت، فاحترق {S} الأصفر ذو الرائحة الكريهة، ولمع {Se} في الظلام.'],
+  order:['H','C','N','O','P','S','Se']},
+ {title:'🧂 اللافلزات 2: الإخوة الأربعة',
+  paras:['{F} في معجون الأسنان، و{Cl} في ماء المسبح، و{Br} السائل الأحمر، و{I} البنفسجي في الجرح.'],
+  order:['F','Cl','Br','I']},
+ {title:'👑 اللافلزات 3: النبلاء الخمسة',
+  paras:['هم أغنياء لا يختلطون بأحد: {He} في بالونات العيد، و{Ne} في لافتة المحل، و{Ar} في المصباح، و{Kr} و{Xe} في مصابيح السيارات.'],
+  order:['He','Ne','Ar','Kr','Xe']}
+];
+// صورة (إيموجي) وعبارة قصيرة لكل عنصر
+const PIC={
+ B:['🏗️🪜','بنى السلّم'],Si:['💻','رقاقة الحاسوب'],Ge:['📟','جهاز إلكتروني'],
+ As:['☠️','سام!'],Sb:['🔨🧱','هش يتكسّر'],Te:['☀️🔋','لوح شمسي'],
+ H:['💧','أخف عنصر (في الماء)'],C:['💎⚫','فحم وألماس'],N:['🌬️','يملأ الهواء'],
+ O:['🫁','نتنفسه'],P:['🔥','عود الكبريت'],S:['🟡','أصفر ورائحته كريهة'],Se:['✨','يلمع'],
+ F:['🦷','معجون الأسنان'],Cl:['🏊','ماء المسبح'],Br:['🔴🧪','سائل أحمر'],I:['🟣🩹','بنفسجي للجروح'],
+ He:['🎈','بالون العيد'],Ne:['🪧','لافتة المحل'],Ar:['💡','المصباح'],Kr:['🚗','مصباح السيارة'],Xe:['🚙','مصباح السيارة']
+};
+function buildStories(){
+  const root=$('#story-list');
+  STORIES.forEach(s=>{
+    const box=document.createElement('div');box.className='card story';
+    const html=s.paras.map(p=>'<p>'+p.replace(/\{(\w+)\}/g,(_,sym)=>{
+      const e=D.find(x=>x.sym===sym),T=TYPES[e.t];
+      return `<button class="sel-el" data-sym="${sym}" style="background:${T.bg};border-color:${T.c};color:${T.c}">${e.name.replace(/ \(.*\)/,'')} (${sym})</button>`;
+    })+'</p>').join('');
+    box.innerHTML=`<h2>${s.title}</h2>${s.note?`<div class="note">${s.note}</div>`:''}${html}
+      <div class="note">الترتيب بالصور (اقرأه من اليمين إلى اليسار):</div>
+      <div class="strip">${s.order.map((sym,i)=>{
+        const e=D.find(x=>x.sym===sym),T=TYPES[e.t],[pic,cap]=PIC[sym];
+        return (i?'<span class="arr">←</span>':'')+`<button class="scene" data-sym="${sym}" style="background:${T.bg};border-color:${T.c}"><span class="pic">${pic}</span><b style="color:${T.c}" dir="ltr">${sym}</b><span>${e.name.replace(/ \(.*\)/,'')}</span><small>${cap}</small></button>`;
+      }).join('')}</div>
+      <div class="detail"></div><div class="qa"></div>
+      <div class="row"><button class="btn alt ask">🧠 اختبرني على هذه القصة</button></div>`;
+    const detail=box.querySelector('.detail');
+    box.querySelectorAll('.sel-el,.scene').forEach(b=>b.onclick=()=>{
+      const e=D.find(x=>x.sym===b.dataset.sym);
+      detail.style.color=TYPES[e.t].c;detail.textContent=`${e.name}: ${typeLabel(e)} — ${e.fact}`;
+    });
+    box.querySelector('.ask').onclick=()=>askStory(box,s);
+    root.appendChild(box);
+  });
+}
+function askStory(box,s){
+  const qa=box.querySelector('.qa'),i=Math.random()*(s.order.length-1)|0;
+  const name=sym=>D.find(x=>x.sym===sym).name;
+  const right=s.order[i+1];
+  const opts=shuffle([right,...pick(D.filter(e=>e.sym!==right&&e.sym!==s.order[i]),3).map(e=>e.sym)]);
+  qa.innerHTML=`<p style="margin:8px 0"><b>في القصة، من جاء بعد ${name(s.order[i])}؟</b></p>
+    <div class="opts">${opts.map(o=>`<button class="opt" data-s="${o}">${name(o)} (${o})</button>`).join('')}</div><div class="msg"></div>`;
+  qa.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    qa.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.s===right)x.classList.add('right')});
+    if(b.dataset.s===right)qa.querySelector('.msg').textContent='🎉 صحيح!';
+    else{b.classList.add('wrong');qa.querySelector('.msg').textContent='الجواب: '+name(right)}
+  });
+}
+buildStories();
+
+// ---------- سحب وإفلات ----------
+let sortPool=[],selChip=null,placed=0,wrongs=0,counts={m:0,s:0,n:0};
+function newSort(){
+  // ضمان وجود الأنواع الثلاثة: 4 فلزات و3 أشباه و4 لافلزات
+  const by=t=>D.filter(e=>e.t===t);
+  sortPool=shuffle([...pick(by('m'),4),...pick(by('s'),3),...pick(by('n'),4)]);
+  counts={m:0,s:0,n:0};placed=0;wrongs=0;selChip=null;
+  $('#sort-msg').textContent='';
+  $('#bins').innerHTML=Object.entries(TYPES).map(([k,v])=>
+    `<div class="bin" data-t="${k}" style="border-color:${v.c};background:${v.bg}22"><h3 style="color:${v.c}">${v.plural}</h3><div class="count" id="cnt-${k}">0</div></div>`).join('');
+  document.querySelectorAll('.bin').forEach(b=>b.onclick=()=>{if(selChip)drop(selChip,b.dataset.t)});
+  const pool=$('#pool');pool.innerHTML='';
+  sortPool.forEach(e=>{
+    const c=document.createElement('div');
+    c.className='chip';c.dataset.n=e.n;c.innerHTML=`${e.sym}<small>${e.name}</small>`;
+    c.addEventListener('pointerdown',ev=>startDrag(ev,c,e));
+    pool.appendChild(c);
+  });
+}
+function drop(chip,t){
+  const e=D.find(x=>x.n==chip.dataset.n);
+  if(e.t===t){
+    chip.remove();counts[t]++;placed++;selChip=null;
+    $('#cnt-'+t).textContent=counts[t];
+    $('#sort-msg').style.color='var(--good)';
+    $('#sort-msg').textContent=`✅ صحيح! ${e.name} ${TYPES[t].label}`;
+    if(placed===sortPool.length){
+      $('#sort-msg').textContent=wrongs===0?'🌟 رائع! أنهيت الجولة دون أي خطأ':`🎉 أحسنت! أنهيت الجولة بـ ${wrongs} أخطاء. جرّب مرة أخرى`;
+    }
+  }else{
+    wrongs++;chip.classList.remove('shake');void chip.offsetWidth;chip.classList.add('shake');
+    $('#sort-msg').style.color='var(--bad)';
+    $('#sort-msg').textContent=`❌ ليس تماماً، فكّر في موقع ${e.sym} في الجدول`;
+  }
+}
+function startDrag(ev,chip,e){
+  ev.preventDefault();
+  const sx=ev.clientX,sy=ev.clientY;let ghost=null,moved=false,hot=null;
+  const move=m=>{
+    if(!moved&&Math.hypot(m.clientX-sx,m.clientY-sy)<6)return;
+    if(!moved){moved=true;ghost=chip.cloneNode(true);ghost.classList.add('ghost');document.body.appendChild(ghost);chip.style.opacity=.3}
+    ghost.style.left=m.clientX-ghost.offsetWidth/2+'px';ghost.style.top=m.clientY-ghost.offsetHeight/2+'px';
+    const b=document.elementsFromPoint(m.clientX,m.clientY).find(x=>x.classList?.contains('bin'));
+    if(hot!==b){hot&&hot.classList.remove('hot');hot=b||null;hot&&hot.classList.add('hot')}
+  };
+  const up=u=>{
+    window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);
+    chip.style.opacity='';hot&&hot.classList.remove('hot');
+    if(!moved){
+      document.querySelectorAll('.chip.sel').forEach(x=>x.classList.remove('sel'));
+      selChip=selChip===chip?null:chip;chip.classList.toggle('sel',!!selChip);return;
+    }
+    ghost.remove();
+    const b=document.elementsFromPoint(u.clientX,u.clientY).find(x=>x.classList?.contains('bin'));
+    if(b)drop(chip,b.dataset.t);
+  };
+  window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);
+}
+$('#sort-new').onclick=newSort;newSort();
+
+// ---------- بطاقات الحفظ ----------
+let deck=[],total=0;
+function newDeck(){deck=shuffle(D);total=deck.length;showCard()}
+function showCard(){
+  const fl=$('#flash');fl.classList.remove('flipped');
+  $('#fc-bar').style.width=((total-deck.length)/total*100)+'%';
+  if(!deck.length){
+    $('#flash-inner').innerHTML=`<div class="face front" style="border-color:var(--accent)"><b style="font-size:60px">🏆</b><div>أنهيت كل البطاقات!</div></div>`;
+    $('#fc-msg').innerHTML='<button class="btn" onclick="newDeck()">ابدأ من جديد</button>';return;
+  }
+  const e=deck[0],T=TYPES[e.t];
+  $('#flash-inner').innerHTML=`<div class="face front" style="border-color:${T.c}"><small>ما نوع هذا العنصر؟</small><b>${e.sym}</b></div>
+  <div class="face back" style="border-color:${T.c};background:${T.bg};color:${T.c}"><h2 style="margin:0">${e.name}</h2><h3 style="margin:4px 0">${typeLabel(e)}</h3><div style="color:var(--ink)">الدورة ${e.p} • المجموعة ${e.g}</div><div style="color:var(--ink)">${e.fact}</div></div>`;
+  $('#fc-msg').textContent=`تبقّى ${deck.length} بطاقة — اضغط على البطاقة لتقلبها`;
+}
+$('#flash').onclick=()=>deck.length&&$('#flash').classList.toggle('flipped');
+$('#fc-yes').onclick=()=>{if(deck.length){deck.shift();showCard()}};
+$('#fc-no').onclick=()=>{if(deck.length){const e=deck.shift();deck.splice(Math.min(3,deck.length),0,e);showCard()}};
+newDeck();
+
+// ---------- الاختبار ----------
+let Q=[],qi=0,score=0;
+const best=()=>{try{return +localStorage.getItem('metals-best')||0}catch(_){return 0}};
+const saveBest=s=>{try{if(s>best())localStorage.setItem('metals-best',s)}catch(_){}};
+function makeQuestion(){
+  const kind=Math.random()*3|0;
+  if(kind===0){
+    const e=pick(D,1)[0];
+    return {q:`ما نوع العنصر <b dir="ltr">${e.sym}</b> (${e.name})؟`,opts:['فلز','شبه فلز','لافلز'],a:TYPES[e.t].label};
+  }
+  const t=['m','s','n'][Math.random()*3|0];
+  const right=pick(D.filter(e=>e.t===t),1)[0];
+  const others=pick(D.filter(e=>e.t!==t),3);
+  return {q:`أي العناصر التالية ${TYPES[t].label}؟`,
+          opts:shuffle([right,...others]).map(e=>`${e.name} (${e.sym})`),a:`${right.name} (${right.sym})`};
+}
+function startQuiz(){
+  Q=Array.from({length:10},makeQuestion);qi=0;score=0;showQ();
+}
+function showQ(){
+  const box=$('#quiz-box');
+  if(qi>=Q.length){
+    saveBest(score);
+    const st=score>=9?3:score>=7?2:score>=5?1:0;
+    box.innerHTML=`<div class="stars">${'⭐'.repeat(st)||'💪'}</div><h2 style="text-align:center">نتيجتك ${score} من 10</h2>
+    <p style="text-align:center">أفضل نتيجة: ${best()} من 10</p><div class="row"><button class="btn" id="again">اختبار جديد</button></div>`;
+    $('#again').onclick=startQuiz;return;
+  }
+  const q=Q[qi];
+  box.innerHTML=`<div class="bar"><i style="width:${qi/Q.length*100}%"></i></div>
+  <div style="color:var(--muted)">السؤال ${qi+1} من ${Q.length} • النقاط ${score}</div>
+  <h2>${q.q}</h2><div class="opts">${q.opts.map(o=>`<button class="opt">${o}</button>`).join('')}</div><div class="msg" id="qmsg"></div>`;
+  box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const ok=b.textContent===q.a;
+    box.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.textContent===q.a)x.classList.add('right')});
+    if(ok){score++;$('#qmsg').textContent='🎉 إجابة صحيحة!'}else{b.classList.add('wrong');$('#qmsg').textContent='الإجابة الصحيحة: '+q.a}
+    setTimeout(()=>{qi++;showQ()},1300);
+  });
+}
+startQuiz();
+</script>
+</body>
+</html>
